@@ -2,7 +2,6 @@ var song;
 var BAR_WIDTH;
 var MAX_BAR_HEIGHT;
 var LEFT_OFFSET;
-var color;
 
 function preload() {
     song = loadSound('music/1.mp3');
@@ -20,9 +19,12 @@ function setup() {
 
     // Patch the input to an volume analyzer
     analyzer.setInput(song);
-    BAR_WIDTH = Math.round(windowWidth / 128);
+    // There should be 64 Bars which take half of the screen width
+    BAR_WIDTH = Math.round(windowWidth / (64*2));
+    // Bars go upwards and downwards and should take at maximum amplitude half of the screen high
     MAX_BAR_HEIGHT = Math.round(windowHeight / 4);
-    LEFT_OFFSET = windowWidth/3.5;
+    //
+    LEFT_OFFSET = windowWidth/2 - 35*BAR_WIDTH;
 
     color = [random(0, 255), random(0, 255), random(0, 255)];
 
@@ -58,17 +60,21 @@ function draw() {
     var spectrum = fft.analyze();
     var sum = 0;
     var median = 0;
+    var level_size = Math.round(spectrum.length/64);    // number of frequencies to sum up to one bar in order
+                                                        // to get 64 bars at the end
 
     fill(color[0]-35, color[1]-35, color[2]-35);
     noStroke();
 
     beginShape();
-    for (i = 0; i<spectrum.length-384; i++) {
-        if (i % BAR_WIDTH == 0) {
-            median = sum / BAR_WIDTH;
+    for (i = 0; i<spectrum.length; i++) {
+        if (i % level_size == 0) { // average level_size frequencies to one amplitude/bar
+            median = sum / level_size;
 
             var bar_height = (median/255)*MAX_BAR_HEIGHT;
-            rect(i + i/4 + LEFT_OFFSET, (height/2)-bar_height, BAR_WIDTH, 2*bar_height);
+            var x_start = 1.25*(i/level_size)*BAR_WIDTH + LEFT_OFFSET; // 0.25 extra for leaving a little gap between bars
+            var y_start = (height/2)-bar_height;
+            rect(x_start, y_start, BAR_WIDTH, 2*bar_height);
             sum = 0;
         } else {
             sum += spectrum[i];
@@ -78,7 +84,6 @@ function draw() {
 
     // toggle between play and resume button
     var wm = windowWidth/2;
-    var hm = windowHeight/2;
     if (song.isPlaying()) {
         // play button
         rect(wm-35, windowHeight-(windowHeight/10)+30, 20, -60);
