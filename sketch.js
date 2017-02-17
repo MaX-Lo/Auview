@@ -3,12 +3,14 @@ var BAR_WIDTH;
 var MAX_BAR_HEIGHT;
 var LEFT_OFFSET;
 
+var color;
+
 function preload() {
-    song = loadSound('music/1.mp3');
+    song = loadSound('music/1.m4a');
 }
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
+    var canv = createCanvas(windowWidth, windowHeight);
     song.loop();
 
     fft = new p5.FFT();
@@ -26,7 +28,7 @@ function setup() {
     //
     LEFT_OFFSET = windowWidth/2 - 35*BAR_WIDTH;
 
-    color = [random(0, 255), random(0, 255), random(0, 255)];
+    color = [random(255), random(255), random(255)];
 
     mouseClicked = function () {
         if (song.isPlaying()) {
@@ -34,6 +36,23 @@ function setup() {
         } else {
             song.play();
         }
+    };
+
+    canv.drop(gotFile);
+}
+
+function resetAnalyzer(newSong) {
+    song.stop();
+    song = loadSound(newSong);
+    fft.setInput(song);
+    analyzer.setInput(song);
+}
+
+function gotFile(file) {
+    if (file.type === 'audio') {
+        resetAnalyzer(file);
+    } else {
+        console.log("The given file isn't an audio file.");
     }
 }
 
@@ -47,10 +66,36 @@ function keyPressed() {
     }
 }
 
+function formatTime(time) {
+    /*** Takes time in seconds and returns time in xx:xx format ***/
+    var str;
+    // minutes
+    if (Math.floor(time/60) === 0) {
+        str = "00:";
+    } else if (Math.floor(time/60) < 10){
+        str =  "0" + Math.floor(time/60) + ":";
+    } else {
+        str = Math.floor(time/60) + ":";
+    }
+
+    // seconds
+    if (time%60 === 0) {
+        return str + "00";
+    } else if (time%60 < 10) {
+        return str + "0" + Math.floor(time%60);
+    } else{
+        return str + Math.floor(time%60);
+    }
+}
 
 function draw() {
 
     background(color[0], color[1], color[2]);
+
+    noStroke();
+    textSize(32);
+    text(formatTime(song.currentTime()), (windowWidth/2)-(39*BAR_WIDTH), windowHeight/2);
+    text(formatTime(song.duration()), (windowWidth/2)+(35*BAR_WIDTH), windowHeight/2);
 
     stroke(color[0]-35, color[1]-35, color[2]-35);
     noFill();
