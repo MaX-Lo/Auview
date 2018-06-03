@@ -26,7 +26,7 @@ function setup() {
     // Bars go upwards and downwards and should take at maximum amplitude half of the screen high
     MAX_BAR_HEIGHT = Math.round(windowHeight / 4);
     //
-    LEFT_OFFSET = windowWidth/2 - 35*BAR_WIDTH;
+    LEFT_OFFSET = windowWidth/2 - 32*BAR_WIDTH;
 
     color = [random(255), random(255), random(255)];
 
