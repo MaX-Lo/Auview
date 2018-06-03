@@ -1,6 +1,11 @@
 # Auview
-is a minimalistic spectrum analyzer/visualizer for your webbrowser.
 
-To play and analyze your own music simply drag n drop your file onto the screen.
+![App-Screenshot](https://github.com/MaX-Lo/Auview/blob/master/images/AudioView_Screenshot.png)
 
-Default is the wonderfull Track by Tracky Birthday named Websiiite played.
+Auview is a minimalistic spectrum analyzer/visualizer for your webbrowser.
+
+To play and display your own musics frequencies simply drag n drop your file onto the screen. To enqueue music drag multiple files on the screen.
+
+Stop and resume by clicking anywhere on the screen or press space.
+
+By default Websiiite by Tracky Birthday is played.
