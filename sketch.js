@@ -10,7 +10,7 @@ function preload() {
 }
 
 function setup() {
-    var canv = createCanvas(windowWidth, windowHeight);
+    var canvas = this.createCanvas(window.innerWidth, window.innerHeight);
     song.loop();
 
     fft = new p5.FFT();
@@ -22,15 +22,17 @@ function setup() {
     // Patch the input to an volume analyzer
     analyzer.setInput(song);
     // There should be 64 Bars which take half of the screen width
-    BAR_WIDTH = Math.round(windowWidth / (64*2));
+    BAR_WIDTH = Math.round(window.innerWidth / (64*2));
     // Bars go upwards and downwards and should take at maximum amplitude half of the screen high
-    MAX_BAR_HEIGHT = Math.round(windowHeight / 4);
+    MAX_BAR_HEIGHT = Math.round(window.innerHeight / 4);
     //
-    LEFT_OFFSET = windowWidth/2 - 32*BAR_WIDTH;
+    LEFT_OFFSET = window.innerWidth/2 - 32*BAR_WIDTH;
+
+    TIME_TEXT_WIDTH = textWidth('00:00');
 
     color = [random(255), random(255), random(255)];
 
-    mouseClicked = function () {
+    this.mouseClicked = function () {
         if (song.isPlaying()) {
             song.pause();
         } else {
@@ -38,7 +40,17 @@ function setup() {
         }
     };
 
-    canv.drop(gotFile);
+    window.onresize = function () {
+        canvas.size(window.innerWidth, window.innerHeight);
+        // There should be 64 Bars which take half of the screen width
+        BAR_WIDTH = Math.round(window.innerWidth / (64*2));
+        // Bars go upwards and downwards and should take at maximum amplitude half of the screen high
+        MAX_BAR_HEIGHT = Math.round(window.innerHeight / 4);
+        //
+        LEFT_OFFSET = window.innerWidth/2 - 32*BAR_WIDTH;
+    }
+
+    canvas.drop(gotFile);
 }
 
 function resetAnalyzer(newSong) {
@@ -92,15 +104,15 @@ function draw() {
 
     background(color[0], color[1], color[2]);
 
-    noStroke();
+    this.noStroke();
     textSize(32);
-    text(formatTime(song.currentTime()), (windowWidth/2)-(39*BAR_WIDTH), windowHeight/2);
-    text(formatTime(song.duration()), (windowWidth/2)+(35*BAR_WIDTH), windowHeight/2);
+    text(formatTime(song.currentTime()), (window.innerWidth/2)-(39*BAR_WIDTH)-TIME_TEXT_WIDTH, window.innerHeight/2);
+    text(formatTime(song.duration()), (window.innerWidth/2)+(35*BAR_WIDTH), window.innerHeight/2);
 
     stroke(color[0]-35, color[1]-35, color[2]-35);
     noFill();
     strokeWeight(8);
-    rect(25, 25, windowWidth-50, windowHeight-50);
+    rect(25, 25, window.innerWidth-50, window.innerHeight-50);
 
     var spectrum = fft.analyze();
     var sum = 0;
@@ -109,16 +121,16 @@ function draw() {
                                                         // to get 64 bars at the end
 
     fill(color[0]-35, color[1]-35, color[2]-35);
-    noStroke();
+    this.noStroke();
 
     beginShape();
-    for (i = 0; i<spectrum.length; i++) {
-        if (i % level_size == 0) { // average level_size frequencies to one amplitude/bar
+    for (var i = 0; i<spectrum.length; i++) {
+        if (i % level_size === 0) { // average level_size frequencies to one amplitude/bar
             median = sum / level_size;
 
             var bar_height = (median/255)*MAX_BAR_HEIGHT;
             var x_start = 1.25*(i/level_size)*BAR_WIDTH + LEFT_OFFSET; // 0.25 extra for leaving a little gap between bars
-            var y_start = (height/2)-bar_height;
+            var y_start = (window.innerHeight/2)-bar_height;
             rect(x_start, y_start, BAR_WIDTH, 2*bar_height);
             sum = 0;
         } else {
@@ -128,21 +140,21 @@ function draw() {
     endShape();
 
     // toggle between play and resume button
-    var wm = windowWidth/2;
+    var window_mid = window.innerWidth / 2;
     if (song.isPlaying()) {
         // play button
-        rect(wm-35, windowHeight-(windowHeight/10)+30, 20, -60);
-        rect(wm-5, windowHeight-(windowHeight/10)+30, 20, -60);
+        rect(window_mid-35, window.innerHeight - 40, 20, -60);
+        rect(window_mid-5, window.innerHeight - 40, 20, -60);
 
     } else {
         // resume button
-        triangle(wm-30, windowHeight-(windowHeight/10)-30, wm-30, windowHeight-(windowHeight/10)+30, wm+18, windowHeight-(windowHeight/10));
+        triangle(window_mid-30, window.innerHeight-40, window_mid-30, window.innerHeight-100, window_mid+18, window.innerHeight-70);
     }
 
     // progressbar
     var progress = song.currentTime()/song.duration();
     stroke(color[0]-25, color[1]-25, color[2]-25);
     strokeWeight(15);
-    line(50, 50, 100 + progress*(windowWidth-200), 50);
+    line(50, 50, 50 + progress*(window.innerWidth-100), 50);
 
 }
